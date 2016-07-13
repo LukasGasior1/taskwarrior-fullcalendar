@@ -1,12 +1,9 @@
-Simple scripts to show Taskwarrior tasks using javascript [fullcalendar](http://fullcalendar.io/) library.
-
-## Deps:
-```
-pip install pystache
-```
+Simple Python server that shows Taskwarrior tasks using javascript [fullcalendar](http://fullcalendar.io/) library.
 
 ## Usage:
 ```
-./taskwarrior-fullcalendar.sh <filter as in "task export">
+python server.py
+
+// navigate to http://127.0.0.1:9001/
 ```
 

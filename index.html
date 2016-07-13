@@ -2,26 +2,60 @@
 <html>
 <head>
 <meta charset='utf-8' />
-<link href='fullcalendar.css' rel='stylesheet' />
-<script src='moment.min.js'></script>
-<script src='jquery.min.js'></script>
-<script src='fullcalendar.min.js'></script>
+<link href='css/fullcalendar.css' rel='stylesheet' />
+<script src='js/moment.min.js'></script>
+<script src='js/jquery.min.js'></script>
+<script src='js/fullcalendar.min.js'></script>
 <script>
-	$(document).ready(function() {
+  $(document).ready(function() {
+    var refreshInterval = 60000,
+        cal = $("#calendar"),
+        timeout = null,
+        createEvents = function(task) {
+          var events = [];
+          if (task['due']) {
+            events.push({'title': task['description'],
+                         'start': task['due'],
+                         'color': '#ffcc00'});
+	 	      }
+          if (task['scheduled']) {
+            events.push({'title': task['description'],
+                         'start': task['scheduled'],
+                         'color': '#257e4a'});
+ 		      }
+          return events;
+        },
+        updateCalendar = function() {
+          var filter = $("#input-filter").val(),
+              url = filter ? "/tasks?filter=" + encodeURIComponent(filter) : "/tasks";
+          $.getJSON(url, function(tasks) {
+            var events = [].concat(...tasks.map(createEvents));
+            cal.fullCalendar('removeEventSources');
+            cal.fullCalendar('addEventSource', events);
+            timeout = setTimeout(function() {
+              updateCalendar();
+            }, refreshInterval);
+          });
+        };
 
-		$('#calendar').fullCalendar({
-			header: {
-				left: 'prev,next today',
-				center: 'title',
-				right: 'month,agendaWeek,agendaDay'
-			},
+    $("#input-filter").change(function() {
+      clearTimeout(timeout);
+      updateCalendar();
+    });
+
+    cal.fullCalendar({
+      header: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'month,agendaWeek,agendaDay'
+      },
       firstDay: 1,
-			businessHours: true,
-			editable: false,
-			events:   [ {{{events}}} ]
-		});
-		
-	});
+      businessHours: true,
+      editable: false
+    });
+
+    updateCalendar();
+  });
 </script>
 <style>
 	body {
@@ -31,14 +65,23 @@
 		font-size: 14px;
 	}
 
-	#calendar {
+  #container {
+    margin: 0 auto;
 		max-width: 900px;
-		margin: 0 auto;
-	}
+  }
+
+ #input-filter {
+   margin-bottom: 10px;
+   width: 50%;
+ }
+
 </style>
 </head>
 <body>
-	<div id='calendar'></div>
+  <div id="container">
+    <label>Filter:</label>
+    <input id="input-filter" type="text" />
+    <div id="calendar"></div>
+  </div>
 </body>
 </html>
-

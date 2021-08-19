@@ -11,6 +11,8 @@ class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 filter_param = query_components.get("filter")[0]
                 cmd.append(filter_param)
             output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+            self.send_response(200)
+            self.end_headers()
             self.wfile.write(output)             
         else:
             SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
